@@ -31,3 +31,7 @@ Thumbs.db
 .gradle
 build/
 *.iml
+
+#Keystore
+uwallet.keystore
+gradle.properties

@@ -24,13 +24,34 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
+    signingConfigs {
+        releaseSignConfig {
+            if (file('gradle.properties').exists()) {
+                storeFile file(project.keyStore)
+                storePassword project.keyStorePassword
+                keyAlias project.keyAlias
+                keyPassword project.keyAliasPassword
+            }
+        }
+        debugSignConfig {
+            if (file('debug.keystore').exists()) {
+                storeFile file('debug.keystore')
+                storePassword 'android'
+                keyAlias 'androiddebugkey'
+                keyPassword 'android'
+            }
+        }
+    }
+
     buildTypes {
         debug {
+            signingConfig signingConfigs.debugSignConfig
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
 
         release {
+            signingConfig signingConfigs.releaseSignConfig
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
