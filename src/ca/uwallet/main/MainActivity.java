@@ -10,12 +10,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.app.Activity;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,7 +32,7 @@ import android.widget.Toast;
  * @author Gabriel
  *
  */
-public class MainActivity extends ActionBarActivity implements
+public class MainActivity extends Activity implements
 	TransactionFragment.Listener, MenuFragment.Listener{
 	
 	private static final String TAG = "MainActivity";
@@ -72,8 +72,8 @@ public class MainActivity extends ActionBarActivity implements
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
      
         //Action bar icon tap to open drawer
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
         
         
         // ActionBarDrawerToggle ties together the the proper interactions
@@ -86,12 +86,12 @@ public class MainActivity extends ActionBarActivity implements
                 R.string.drawer_close  /* "close drawer" description for accessibility */
                 ) {
             public void onDrawerClosed(View view) {
-                supportInvalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 
             public void onDrawerOpened(View drawerView) {
                 
-                supportInvalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
@@ -196,7 +196,7 @@ public class MainActivity extends ActionBarActivity implements
 	 * @param addToBackStack Whether the transaction should be added to back stack.
 	 */
 	private void switchToFragment(Fragment newFrag, boolean addToBackStack) {
-		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+		FragmentTransaction transaction = getFragmentManager().beginTransaction();
 		transaction.replace(R.id.content_frame, newFrag);
 		if (addToBackStack)
 			transaction.addToBackStack(null);
@@ -273,7 +273,7 @@ public class MainActivity extends ActionBarActivity implements
 		// When about button is removed, there's an increase in speed
 		// DDMS indicates that there are 9 MB bitmap iamges
 		// Possibly because of large drawables for ImageButton
-		FragmentManager manager = getSupportFragmentManager();
+		FragmentManager manager = getFragmentManager();
 		if (manager.getBackStackEntryCount() == 0){
 			super.onBackPressed(); // Closes the app
 		}
