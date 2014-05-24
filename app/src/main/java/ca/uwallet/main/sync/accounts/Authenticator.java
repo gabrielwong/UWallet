@@ -1,4 +1,4 @@
-package ca.uwallet.main.accounts;
+package ca.uwallet.main.sync.accounts;
 
 import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
@@ -12,12 +12,12 @@ import ca.uwallet.main.LoginActivity;
 
 public class Authenticator extends AbstractAccountAuthenticator {
 	
-	private Context mContext = null;
+	private Context context = null;
 	
     // Simple constructor
     public Authenticator(Context context) {
         super(context);
-        mContext = context;
+        this.context = context;
     }
     @Override
     public Bundle editProperties(AccountAuthenticatorResponse accountAuthenticatorResponse,
@@ -28,8 +28,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
     @Override
     public Bundle addAccount(AccountAuthenticatorResponse response, String accountType,
     		String authTokenType, String[] requiredFeatures, Bundle options) throws NetworkErrorException {
-        final Intent intent = new Intent(mContext, LoginActivity.class);
-        intent.putExtra(LoginActivity.EXTRA_IS_ADDING_NEW_ACCOUNT, true);
+        final Intent intent = new Intent(context, LoginActivity.class);
         intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
         final Bundle bundle = new Bundle();
         bundle.putParcelable(AccountManager.KEY_INTENT, intent);
@@ -59,8 +58,7 @@ public class Authenticator extends AbstractAccountAuthenticator {
     public Bundle updateCredentials(AccountAuthenticatorResponse response,
                                     Account account, String authTokenType, Bundle options)
             throws NetworkErrorException {
-    	final Intent intent = new Intent(mContext, LoginActivity.class);
-        intent.putExtra(LoginActivity.EXTRA_IS_ADDING_NEW_ACCOUNT, false);
+    	final Intent intent = new Intent(context, LoginActivity.class);
         intent.putExtra(LoginActivity.EXTRA_USERNAME, account.name);
         intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
         final Bundle bundle = new Bundle();

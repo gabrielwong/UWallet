@@ -21,7 +21,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
-import ca.uwallet.main.provider.WatcardContract;
+
+import ca.uwallet.main.model.Transaction;
+import ca.uwallet.main.data.WatcardContract;
 import ca.uwallet.main.sync.utils.ConnectionHelper;
 import ca.uwallet.main.sync.utils.ParseHelper;
 
@@ -31,8 +33,7 @@ import ca.uwallet.main.sync.utils.ParseHelper;
  *
  */
 public class SyncAdapter extends AbstractThreadedSyncAdapter{
-	
-	private ContentResolver mContentResolver = null;
+
 	private static final String TAG = "SyncAdapter";
 	public static final int ADDED_BY_WATCARD = 0;
 	public static final int ADDED_BY_COMPILED = 1;
@@ -45,7 +46,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 	 */
 	public SyncAdapter(Context context, boolean autoInitialize) {
 		super(context, autoInitialize);
-		mContentResolver = context.getContentResolver();
 	}
 
 	@Override
@@ -195,8 +195,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 		}
 		
 		Log.i(TAG, "Applying batch update of transactions");
-		mContentResolver.applyBatch(WatcardContract.CONTENT_AUTHORITY, batch);
-		mContentResolver.notifyChange(WatcardContract.Transaction.CONTENT_URI, null, false);
+        ContentResolver contentResolver = getContext().getContentResolver();
+		contentResolver.applyBatch(WatcardContract.CONTENT_AUTHORITY, batch);
+		contentResolver.notifyChange(WatcardContract.Transaction.CONTENT_URI, null, false);
 	}
 	
 	/**
@@ -223,8 +224,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 		}
 		
 		Log.i(TAG, "Applying batch update of balances");
-		mContentResolver.applyBatch(WatcardContract.CONTENT_AUTHORITY, batch);
-		mContentResolver.notifyChange(WatcardContract.Balance.CONTENT_URI, null, false);
+        ContentResolver contentResolver = getContext().getContentResolver();
+		contentResolver.applyBatch(WatcardContract.CONTENT_AUTHORITY, batch);
+		contentResolver.notifyChange(WatcardContract.Balance.CONTENT_URI, null, false);
 	}
 	
 	public void updateTerminalData(HashMap<Integer, String> map, int priority, final SyncResult syncResult) throws RemoteException, OperationApplicationException{
@@ -233,7 +235,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 		
 		Log.i(TAG, "Fetching local terminal entries for merge");
 		Uri uri = WatcardContract.Terminal.CONTENT_URI;
-		Cursor c = mContentResolver.query(uri, null, null, null, null);
+		Cursor c = getContext().getContentResolver().query(uri, null, null, null, null);
 		assert c != null;
 		int idColumn = c.getColumnIndex(WatcardContract.Terminal._ID);
 		int textPriorityColumn = c.getColumnIndex(WatcardContract.Terminal.COLUMN_NAME_TEXT_PRIORITY);
@@ -271,8 +273,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 		}
 		
 		Log.i(TAG, "Applying batch update of terminals");
-		mContentResolver.applyBatch(WatcardContract.CONTENT_AUTHORITY, batch);
-		mContentResolver.notifyChange(WatcardContract.Transaction.CONTENT_URI, null, false);
-		mContentResolver.notifyChange(WatcardContract.Terminal.CONTENT_URI, null, false);
+        ContentResolver contentResolver = getContext().getContentResolver();
+		contentResolver.applyBatch(WatcardContract.CONTENT_AUTHORITY, batch);
+		contentResolver.notifyChange(WatcardContract.Transaction.CONTENT_URI, null, false);
+		contentResolver.notifyChange(WatcardContract.Terminal.CONTENT_URI, null, false);
 	}
 }

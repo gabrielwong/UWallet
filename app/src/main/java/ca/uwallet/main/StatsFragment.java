@@ -18,7 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import ca.uwallet.main.provider.WatcardContract;
+import ca.uwallet.main.data.WatcardContract;
 import ca.uwallet.main.util.ProviderUtils;
 
 

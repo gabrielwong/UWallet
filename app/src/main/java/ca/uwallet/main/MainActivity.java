@@ -257,7 +257,6 @@ public class MainActivity extends Activity implements
 	 */
 	private void doLogin(){
 		Intent intent = new Intent(this, LoginActivity.class);
-		intent.putExtra(LoginActivity.EXTRA_IS_ADDING_NEW_ACCOUNT, true);
 		Log.v(TAG, "Starting login activity");
 		startActivityForResult(intent, RC_LOGIN);
 		switchToFragment(new BalanceFragment(), false);

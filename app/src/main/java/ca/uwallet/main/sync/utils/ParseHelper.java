@@ -13,8 +13,8 @@ import org.jsoup.nodes.Element;
 import android.annotation.SuppressLint;
 import android.content.ContentProviderOperation;
 import android.util.Log;
-import ca.uwallet.main.provider.WatcardContract;
-import ca.uwallet.main.sync.Transaction;
+import ca.uwallet.main.data.WatcardContract;
+import ca.uwallet.main.model.Transaction;
 
 public class ParseHelper{
 	private static final String TAG = "Parser";

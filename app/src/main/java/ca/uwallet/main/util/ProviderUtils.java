@@ -11,7 +11,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
-import ca.uwallet.main.provider.WatcardContract;
+import ca.uwallet.main.data.WatcardContract;
 
 public class ProviderUtils {
 	

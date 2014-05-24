@@ -10,7 +10,7 @@ import android.content.Loader;
 import android.widget.SimpleCursorAdapter;
 import android.view.View;
 import android.widget.TextView;
-import ca.uwallet.main.provider.WatcardContract;
+import ca.uwallet.main.data.WatcardContract;
 import ca.uwallet.main.util.ProviderUtils;
 
 /**

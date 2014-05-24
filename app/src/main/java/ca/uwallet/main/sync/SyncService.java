@@ -12,9 +12,9 @@ import android.util.Log;
  */
 public class SyncService extends Service {
     // Storage for an instance of the sync adapter
-    private static SyncAdapter sSyncAdapter = null;
+    private static SyncAdapter syncAdapter = null;
     // Object to use as a thread-safe lock
-    private static final Object sSyncAdapterLock = new Object();
+    private static final Object syncAdapterLock = new Object();
     
     private static final String TAG = "SyncService";
     
@@ -25,9 +25,9 @@ public class SyncService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "Service created");
-        synchronized (sSyncAdapterLock) {
-            if (sSyncAdapter == null) {
-                sSyncAdapter = new SyncAdapter(getApplicationContext(), true);
+        synchronized (syncAdapterLock) {
+            if (syncAdapter == null) {
+                syncAdapter = new SyncAdapter(getApplicationContext(), true);
             }
         }
     }
@@ -51,6 +51,6 @@ public class SyncService extends Service {
      */
     @Override
     public IBinder onBind(Intent intent) {
-        return sSyncAdapter.getSyncAdapterBinder();
+        return syncAdapter.getSyncAdapterBinder();
     }
 }

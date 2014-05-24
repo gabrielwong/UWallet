@@ -1,4 +1,4 @@
-package ca.uwallet.main.provider;
+package ca.uwallet.main.data;
 
 import android.content.ContentResolver;
 import android.net.Uri;
@@ -6,7 +6,7 @@ import android.provider.BaseColumns;
 
 /**
  * Field and table name constants for 
- * {@link ca.uwallet.main.provider.WatcardProvider}.
+ * {@link ca.uwallet.main.data.WatcardProvider}.
  * @author Gabriel
  *
  */

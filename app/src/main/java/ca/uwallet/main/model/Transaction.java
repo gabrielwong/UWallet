@@ -1,4 +1,4 @@
-package ca.uwallet.main.sync;
+package ca.uwallet.main.model;
 
 
 /**
@@ -8,11 +8,11 @@ package ca.uwallet.main.sync;
 
 public class Transaction {
 
-	private int mId;
-	private int mAmount;
-	private long mDate;
-	private int mTransactionType;
-	private int mTerminal;
+	private int id;
+	private int amount;
+	private long date;
+	private int transactionType;
+	private int terminal;
 	
 	private static final int DEFAULT_ID = 0;
 	private static final int DEFAULT_AMOUNT = 0;
@@ -34,11 +34,11 @@ public class Transaction {
 	 * @param terminal The transaction terminal (vendor / description).
 	 */
 	public Transaction(int id, int amount, long date, int transactionType, int terminal) {
-		this.mId = id;
-		this.mAmount = amount;
-		this.mDate = date;
-		this.mTransactionType = transactionType;
-		this.mTerminal = terminal;
+		this.id = id;
+		this.amount = amount;
+		this.date = date;
+		this.transactionType = transactionType;
+		this.terminal = terminal;
 	}
 	
 	public Transaction(int amount, long date, int transactionType, int terminal) {
@@ -46,42 +46,42 @@ public class Transaction {
 	}
 
 	public int getID() {
-		return this.mId;
+		return this.id;
 	}
 
 	public void setID(int id) {
-		this.mId = id;
+		this.id = id;
 	}
 
 	public int getAmount() {
-		return this.mAmount;
+		return this.amount;
 	}
 
 	public void setAmount(int amount) {
-		this.mAmount = amount;
+		this.amount = amount;
 	}
 
 	public long getDate() {
-		return mDate;
+		return date;
 	}
 
 	public void setDate(long date) {
-		this.mDate = date;
+		this.date = date;
 	}
 
 	public int getType() {
-		return mTransactionType;
+		return transactionType;
 	}
 
 	public void setTransactionType(int transactionType) {
-		this.mTransactionType = transactionType;
+		this.transactionType = transactionType;
 	}
 
 	public int getTerminal() {
-		return mTerminal;
+		return terminal;
 	}
 
 	public void setTerminal(int terminal) {
-		this.mTerminal = terminal;
+		this.terminal = terminal;
 	}
 }
