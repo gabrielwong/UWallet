@@ -16,8 +16,8 @@ public class WatcardProvider extends ContentProvider{
 	
 	private static final String JOINED_TRANSACTION_TABLE =
 			WatcardContract.Transaction.TABLE_NAME + " LEFT OUTER JOIN " + WatcardContract.Terminal.TABLE_NAME + 
-			" ON " + WatcardContract.Transaction.TABLE_NAME + "" + WatcardContract.Transaction.COLUMN_NAME_TERMINAL +
-			" = " + WatcardContract.Terminal.TABLE_NAME + "" + WatcardContract.Terminal._ID; // TODO join category
+			" ON " + WatcardContract.Transaction.TABLE_NAME + "." + WatcardContract.Transaction.COLUMN_NAME_TERMINAL +
+			" = " + WatcardContract.Terminal.TABLE_NAME + "." + WatcardContract.Terminal._ID; // TODO join category
 	
 	// Create the UriMatcher
 	private static final String AUTHORITY = WatcardContract.CONTENT_AUTHORITY;
