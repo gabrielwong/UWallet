@@ -3,9 +3,9 @@
 
     <string name="app_name">UWallet</string>
     <string name="action_settings">Settings</string>
-    <string name="username_prompt">Student Number</string>
-    <string name="password_prompt">PIN</string>
-    <string name="login_button">Login</string>
+    <string name="username_hint">Student Number</string>
+    <string name="password_hint">PIN</string>
+    <string name="login_button">Sign In</string>
     <string name="meal_plan">Meal Plan:</string>
     <string name="flex_dollars">Flex Dollars:</string>
     <string name="total">Total:</string>
@@ -21,8 +21,8 @@
 	<string name="balance_button">Balance</string>
 	<string name="transactions_button">Transactions</string>
 	<string name="statistics_button">Statistics</string>
-	<string name="logout_button">Logout</string>
-    <string name="login_progress_dialog_title">Logging In</string>
+	<string name="logout_button">Sign Out</string>
+    <string name="login_progress_dialog_title">Signing In</string>
     <string name="login_progress_dialog_message">Please wait...</string>
     
 	<color name="background">#27282B</color>
@@ -37,8 +37,11 @@
 	
 	<string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
-	
-	<string-array name="options_array">
+    <string name="action_sign_in_short">Sign In</string>
+    <string name="action_forgot_password">Forgot Password</string>
+    <string name="title_activity_login">Sign In</string>
+
+    <string-array name="options_array">
         <item>Balance</item>
         <item>Transactions</item>
         <item>Statistics</item>

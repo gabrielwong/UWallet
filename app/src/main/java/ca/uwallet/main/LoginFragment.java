@@ -2,8 +2,6 @@ package ca.uwallet.main;
 
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -12,12 +10,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -27,12 +27,8 @@ import java.io.Serializable;
 
 import ca.uwallet.main.sync.LoginService;
 
-/**
- * Standard fragment with 2 input fields and a button with listener attached
- * @author Seikun
- */
-
-public class LoginFragment extends Fragment implements OnClickListener {
+public class LoginFragment extends Fragment
+        implements OnClickListener, TextView.OnEditorActionListener{
 
     private EditText usernameView;
     private EditText passwordView;
@@ -61,6 +57,7 @@ public class LoginFragment extends Fragment implements OnClickListener {
 		View v = inflater.inflate(R.layout.fragment_login, null, true);
         usernameView = (EditText) v.findViewById(R.id.username_input);
         passwordView = (EditText) v.findViewById(R.id.password_input);
+        passwordView.setOnEditorActionListener(this);
 		v.findViewById(R.id.login_button).setOnClickListener(this);
         setHasOptionsMenu(true);
 
@@ -153,4 +150,12 @@ public class LoginFragment extends Fragment implements OnClickListener {
         imm.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
     }
 
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if (actionId == EditorInfo.IME_ACTION_DONE) {
+            login();
+            return true;
+        }
+        return false;
+    }
 }
