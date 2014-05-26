@@ -4,6 +4,7 @@ import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -99,6 +100,7 @@ public class LoginFragment extends Fragment implements OnClickListener {
                 if (accountAuthenticatorResponse != null) {
                     accountAuthenticatorResponse.onResult(bundle);
                 }
+                getActivity().setResult(Activity.RESULT_OK);
                 getActivity().finish();
                 break;
             case INVALID_CREDENTIALS:
