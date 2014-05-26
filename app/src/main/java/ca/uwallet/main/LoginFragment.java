@@ -5,6 +5,7 @@ import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,11 +36,9 @@ public class LoginFragment extends Fragment implements OnClickListener {
 
     private EditText usernameView;
     private EditText passwordView;
-    private View formView;
-    private View statusView;
-    private TextView statusMessageView;
     private BroadcastReceiver receiver;
     private AccountAuthenticatorResponse accountAuthenticatorResponse;
+    private ProgressDialog progressDialog;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -62,9 +61,6 @@ public class LoginFragment extends Fragment implements OnClickListener {
 		View v = inflater.inflate(R.layout.fragment_login, null, true);
         usernameView = (EditText) v.findViewById(R.id.username_input);
         passwordView = (EditText) v.findViewById(R.id.password_input);
-        formView = v.findViewById(R.id.login_form);
-        statusView = v.findViewById(R.id.login_status);
-        statusMessageView = (TextView) v.findViewById(R.id.login_status_message);
 		v.findViewById(R.id.login_button).setOnClickListener(this);
         setHasOptionsMenu(true);
 
@@ -94,6 +90,7 @@ public class LoginFragment extends Fragment implements OnClickListener {
         if (!(result instanceof LoginService.Result)) {
             return;
         }
+        showProgress(false);
         switch((LoginService.Result)result) {
             case SUCCESS:
                 Bundle bundle = intent.getExtras();
@@ -126,36 +123,25 @@ public class LoginFragment extends Fragment implements OnClickListener {
         intent.putExtra(LoginService.USERNAME, usernameView.getText().toString());
         intent.putExtra(LoginService.PASSWORD, passwordView.getText().toString());
         getActivity().startService(intent);
+        showProgress(true);
     }
 
     /**
      * Shows the progress UI and hides the login form.
      */
     private void showProgress(final boolean show) {
-        int shortAnimTime = getResources().getInteger(
-                android.R.integer.config_shortAnimTime);
-
-        statusView.setVisibility(View.VISIBLE);
-        statusView.animate().setDuration(shortAnimTime)
-                .alpha(show ? 1 : 0)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        statusView.setVisibility(show ? View.VISIBLE
-                                : View.GONE);
-                    }
-                });
-
-        formView.setVisibility(View.VISIBLE);
-        formView.animate().setDuration(shortAnimTime)
-                .alpha(show ? 0 : 1)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        formView.setVisibility(show ? View.GONE
-                                : View.VISIBLE);
-                    }
-                });
+        if (show) {
+            if (progressDialog == null) {
+                progressDialog = new ProgressDialog(getActivity());
+                progressDialog.setTitle(getText(R.string.login_progress_dialog_title));
+                progressDialog.setMessage(getText(R.string.login_progress_dialog_message));
+            }
+            progressDialog.show();
+        } else {
+            if (progressDialog != null) {
+                progressDialog.dismiss();
+            }
+        }
     }
 
     private void showToast(String text, int duration){

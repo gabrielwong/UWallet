@@ -64,9 +64,9 @@ public class BalanceFragment extends Fragment implements LoaderCallbacks<Cursor>
 		Resources res = getResources();
 		
 		if (cursor == null || cursor.getCount() < CommonUtils.BALANCE_CURSOR_COUNT){ // Not synced yet
-			mealLabel = res.getString(R.string.meal_plan) + " " + res.getString(R.string.unknown);
-			flexLabel = res.getString(R.string.flex_dollars) + " " + res.getString(R.string.unknown);
-			totalLabel = res.getString(R.string.total) + " " + res.getString(R.string.unknown);
+			mealLabel = res.getString(R.string.meal_plan) + " " + res.getString(R.string.loading);
+			flexLabel = res.getString(R.string.flex_dollars) + " " + res.getString(R.string.loading);
+			totalLabel = res.getString(R.string.total) + " " + res.getString(R.string.loading);
 		}else{ // Show the data
 			int[] amounts = CommonUtils.getBalanceAmounts(cursor);
 			mealLabel = res.getString(R.string.meal_plan) + " " + CommonUtils.formatCurrency(amounts[CommonUtils.MEAL_PLAN]);
