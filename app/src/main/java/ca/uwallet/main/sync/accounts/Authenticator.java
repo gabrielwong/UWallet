@@ -11,8 +11,9 @@ import android.os.Bundle;
 import ca.uwallet.main.LoginActivity;
 
 public class Authenticator extends AbstractAccountAuthenticator {
-	
-	private Context context = null;
+
+    public static final String ACCOUNT_TYPE = "watcard.uwaterloo.ca";
+    private Context context = null;
 	
     // Simple constructor
     public Authenticator(Context context) {

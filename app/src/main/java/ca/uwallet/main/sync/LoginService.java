@@ -6,16 +6,19 @@ import android.app.IntentService;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 
-import ca.uwallet.main.LoginActivity;
 import ca.uwallet.main.data.WatcardContract;
+import ca.uwallet.main.sync.accounts.Authenticator;
 import ca.uwallet.main.sync.utils.ConnectionHelper;
 import ca.uwallet.main.sync.utils.ParseHelper;
+import ca.uwallet.main.util.CommonUtils;
 
 /**
  * Created by gabriel on 5/23/14.
@@ -24,7 +27,10 @@ public class LoginService extends IntentService{
 
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
+    public static final String RESULT = "result";
+    public static final String KEY_ACCOUNT = "key_account";
     private static final String TAG = "LoginService";
+    public static final IntentFilter FILTER = new IntentFilter(TAG);
 
     public LoginService() {
         super(TAG);
@@ -46,18 +52,22 @@ public class LoginService extends IntentService{
             doc = ConnectionHelper.getBalanceDocument(username, password);
         } catch (IOException e) {
             Log.e(TAG, e.toString());
-            // TODO indicate error
+            Intent out = new Intent();
+            out.putExtra(RESULT, Result.CONNECTION_ERROR);
+            broadcast(out);
             return;
         }
 
         boolean loginSuccessful = ParseHelper.isLoginSuccessful(doc);
         if (!loginSuccessful) {
-            // TODO indicate invalid credentials
+            Intent out = new Intent();
+            out.putExtra(RESULT, Result.INVALID_CREDENTIALS);
+            broadcast(out);
             return;
         }
 
         // Add the account to the AccountManager
-        Account account = new Account(username, LoginActivity.ACCOUNT_TYPE);
+        Account account = new Account(username, Authenticator.ACCOUNT_TYPE);
         AccountManager accountManager = (AccountManager) getSystemService(Context.ACCOUNT_SERVICE);
         boolean addSuccess = accountManager.addAccountExplicitly(account, password, null);
         if (addSuccess){
@@ -73,6 +83,17 @@ public class LoginService extends IntentService{
             // Change password if we could not add the account (error or more likely already added)
             accountManager.setPassword(account, password);
         }
-        // TODO indicate success
+        CommonUtils.requestSync(account);
+        Intent out = new Intent();
+        out.putExtra(RESULT, Result.SUCCESS);
+        out.putExtra(AccountManager.KEY_ACCOUNT_NAME, username);
+        out.putExtra(AccountManager.KEY_ACCOUNT_TYPE, Authenticator.ACCOUNT_TYPE);
+        out.putExtra(AccountManager.KEY_PASSWORD, password);
+        broadcast(out);
+    }
+
+    private void broadcast(Intent intent) {
+        intent.setAction(TAG);
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
     }
 }

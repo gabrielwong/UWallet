@@ -1,6 +1,6 @@
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".LoginActivity" >
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <!-- Login progress -->
 
@@ -79,4 +79,4 @@
 
     </LinearLayout>
 
-</merge>
+</FrameLayout>

@@ -2,7 +2,9 @@ package ca.uwallet.main;
 
 
 
-import ca.uwallet.main.util.ProviderUtils;
+import ca.uwallet.main.sync.accounts.Authenticator;
+import ca.uwallet.main.util.CommonUtils;
+
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
@@ -48,7 +50,7 @@ public class MainActivity extends Activity implements
 		setContentView(R.layout.activity_main);
 		
 		// Login if no account registered
-		int numAccounts = LoginActivity.numAccounts(this);
+		int numAccounts = CommonUtils.getNumberOfAccounts(this);
 		Log.v(TAG, numAccounts + " accounts registered");
 		if (numAccounts == 0){
 			doLogin();
@@ -171,10 +173,6 @@ public class MainActivity extends Activity implements
 			if (responseCode != RESULT_OK){
 				Log.i(TAG, "User cancelled login. Closing down.");
 				finish();
-			} else{
-			// Continue to home page
-				Account account = data.getParcelableExtra(LoginActivity.KEY_ACCOUNT);
-				ProviderUtils.onRefresh(account);
 			}
 			break;
 		}
@@ -224,7 +222,7 @@ public class MainActivity extends Activity implements
 	public void onLogOutButtonClicked() {		
 		// Remove account from AccountManager
 		removeAllAccounts();
-		ProviderUtils.clearData(this);
+		CommonUtils.clearData(this);
 		doLogin();
 	}
 
@@ -246,7 +244,7 @@ public class MainActivity extends Activity implements
 	 */
 	private void removeAllAccounts(){
 		AccountManager accountManager = getAccountManager();
-		Account[] accounts = accountManager.getAccountsByType(LoginActivity.ACCOUNT_TYPE);
+		Account[] accounts = accountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE);
 		for (Account account : accounts){
 			accountManager.removeAccount(account, null, null);
 		}

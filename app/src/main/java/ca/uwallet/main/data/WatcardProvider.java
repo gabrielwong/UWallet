@@ -21,7 +21,7 @@ public class WatcardProvider extends ContentProvider{
 	
 	// Create the UriMatcher
 	private static final String AUTHORITY = WatcardContract.CONTENT_AUTHORITY;
-	private static final UriMatcher sUriMatcher;
+	private static final UriMatcher URI_MATCHER;
 	private static final int ROUTE_TRANSACTION = 1,
 							 ROUTE_TRANSACTION_ID = 2,
 							 ROUTE_BALANCE = 3,
@@ -31,15 +31,15 @@ public class WatcardProvider extends ContentProvider{
 							 ROUTE_CATEGORY = 7,
 							 ROUTE_CATEGORY_ID = 8;
 	static{
-		sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-		sUriMatcher.addURI(AUTHORITY, WatcardContract.PATH_TRANSACTION , ROUTE_TRANSACTION);
-		sUriMatcher.addURI(AUTHORITY, WatcardContract.PATH_TRANSACTION + "/#", ROUTE_TRANSACTION_ID);
-		sUriMatcher.addURI(AUTHORITY, WatcardContract.PATH_BALANCE, ROUTE_BALANCE);
-		sUriMatcher.addURI(AUTHORITY, WatcardContract.PATH_BALANCE + "/#", ROUTE_BALANCE_ID);
-		sUriMatcher.addURI(AUTHORITY, WatcardContract.PATH_TERMINAL , ROUTE_TERMINAL);
-		sUriMatcher.addURI(AUTHORITY, WatcardContract.PATH_TERMINAL + "/#", ROUTE_TERMINAL_ID);
-		sUriMatcher.addURI(AUTHORITY, WatcardContract.PATH_CATEGORY, ROUTE_CATEGORY);
-		sUriMatcher.addURI(AUTHORITY, WatcardContract.PATH_CATEGORY + "/#", ROUTE_CATEGORY_ID);
+		URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
+		URI_MATCHER.addURI(AUTHORITY, WatcardContract.PATH_TRANSACTION , ROUTE_TRANSACTION);
+		URI_MATCHER.addURI(AUTHORITY, WatcardContract.PATH_TRANSACTION + "/#", ROUTE_TRANSACTION_ID);
+		URI_MATCHER.addURI(AUTHORITY, WatcardContract.PATH_BALANCE, ROUTE_BALANCE);
+		URI_MATCHER.addURI(AUTHORITY, WatcardContract.PATH_BALANCE + "/#", ROUTE_BALANCE_ID);
+		URI_MATCHER.addURI(AUTHORITY, WatcardContract.PATH_TERMINAL, ROUTE_TERMINAL);
+		URI_MATCHER.addURI(AUTHORITY, WatcardContract.PATH_TERMINAL + "/#", ROUTE_TERMINAL_ID);
+		URI_MATCHER.addURI(AUTHORITY, WatcardContract.PATH_CATEGORY, ROUTE_CATEGORY);
+		URI_MATCHER.addURI(AUTHORITY, WatcardContract.PATH_CATEGORY + "/#", ROUTE_CATEGORY_ID);
 	}
 	
 	@Override
@@ -54,7 +54,7 @@ public class WatcardProvider extends ContentProvider{
      * Determine the mime type for entries returned by a given URI.
      */
 	public String getType(Uri uri) {
-		switch(sUriMatcher.match(uri)){
+		switch(URI_MATCHER.match(uri)){
 		case ROUTE_TRANSACTION:
 			return WatcardContract.Transaction.CONTENT_TYPE;
 		case ROUTE_TRANSACTION_ID:
@@ -87,70 +87,57 @@ public class WatcardProvider extends ContentProvider{
 			String[] selectionArgs, String sortOrder) {
 		SQLiteDatabase db = databaseHelper.getReadableDatabase();
         SelectionBuilder builder = new SelectionBuilder();
-        String id;
-        Cursor c;
-        Context ctx = getContext();
-        int uriMatch = sUriMatcher.match(uri);
-        switch (uriMatch) {
-            case ROUTE_TRANSACTION_ID:
-                // Return a single entry, by ID.
-                id = uri.getLastPathSegment();
-                builder.where(WatcardContract.Transaction._ID + "=?", id);
-            case ROUTE_TRANSACTION:
-                // Return all known entries.
+        switch (URI_MATCHER.match(uri)) {
+            case ROUTE_TRANSACTION_ID: {
+                String id = uri.getLastPathSegment();
                 builder.table(JOINED_TRANSACTION_TABLE)
-                       .where(selection, selectionArgs);
-                c = builder.query(db, projection, sortOrder);
-                // Note: Notification URI must be manually set here for loaders to correctly
-                // register ContentObservers.
-                assert ctx != null;
-                c.setNotificationUri(ctx.getContentResolver(), uri);
-                return c;
-            case ROUTE_BALANCE_ID:
-            	// Return a single entry, by ID
-            	id = uri.getLastPathSegment();
-            	builder.where(WatcardContract.Balance._ID + "=?", id);
-            case ROUTE_BALANCE:
-            	// Return all known entries
-            	builder.table(WatcardContract.Balance.TABLE_NAME)
-            		   .where(selection, selectionArgs);
-            	c = builder.query(db, projection, sortOrder);
-            	// Note: Notification URI must be manually set here for loaders to correctly
-                // register ContentObservers.
-                assert ctx != null;
-                c.setNotificationUri(ctx.getContentResolver(), uri);
-                return c;
-            case ROUTE_TERMINAL_ID:
-            	// Return a single entry, by ID
-            	id = uri.getLastPathSegment();
-            	builder.where(WatcardContract.Terminal._ID + "=?", id);
-            case ROUTE_TERMINAL:
-            	// Return all known entries
-            	builder.table(WatcardContract.Terminal.TABLE_NAME)
-            		   .where(selection, selectionArgs);
-            	c = builder.query(db, projection, sortOrder);
-            	// Note: Notification URI must be manually set here for loaders to correctly
-                // register ContentObservers.
-                assert ctx != null;
-                c.setNotificationUri(ctx.getContentResolver(), uri);
-                return c;
-            case ROUTE_CATEGORY_ID:
-            	// Return a single entry, by ID
-            	id = uri.getLastPathSegment();
-            	builder.where(WatcardContract.Category._ID + "=?", id);
-            case ROUTE_CATEGORY:
-            	// Return all known entries
-            	builder.table(WatcardContract.Category.TABLE_NAME)
-            		   .where(selection, selectionArgs);
-            	c = builder.query(db, projection, sortOrder);
-            	// Note: Notification URI must be manually set here for loaders to correctly
-                // register ContentObservers.
-                assert ctx != null;
-                c.setNotificationUri(ctx.getContentResolver(), uri);
-                return c;
+                        .where(WatcardContract.Transaction._ID + "=?", id);
+                break;
+            }
+            case ROUTE_TRANSACTION: {
+                builder.table(JOINED_TRANSACTION_TABLE)
+                        .where(selection, selectionArgs);
+                break;
+            }
+            case ROUTE_BALANCE_ID: {
+                String id = uri.getLastPathSegment();
+                builder.table(WatcardContract.Balance.TABLE_NAME)
+                        .where(WatcardContract.Balance._ID + "=?", id);
+                break;
+            }
+            case ROUTE_BALANCE: {
+                builder.table(WatcardContract.Balance.TABLE_NAME)
+                        .where(selection, selectionArgs);
+                break;
+            }
+            case ROUTE_TERMINAL_ID: {
+                String id = uri.getLastPathSegment();
+                builder.table(WatcardContract.Terminal.TABLE_NAME)
+                        .where(WatcardContract.Terminal._ID + "=?", id);
+                break;
+            }
+            case ROUTE_TERMINAL: {
+                builder.table(WatcardContract.Terminal.TABLE_NAME)
+                        .where(selection, selectionArgs);
+                break;
+            }
+            case ROUTE_CATEGORY_ID: {
+                String id = uri.getLastPathSegment();
+                builder.table(WatcardContract.Category.TABLE_NAME)
+                        .where(WatcardContract.Category._ID + "=?", id);
+                break;
+            }
+            case ROUTE_CATEGORY: {
+                builder.table(WatcardContract.Category.TABLE_NAME)
+                        .where(selection, selectionArgs);
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
+        Cursor cursor = builder.query(db, projection, sortOrder);
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+        return cursor;
 	}
 	
 	/**
@@ -160,7 +147,7 @@ public class WatcardProvider extends ContentProvider{
 	public Uri insert(Uri uri, ContentValues values) {
 		final SQLiteDatabase db = databaseHelper.getWritableDatabase();
         assert db != null;
-        final int match = sUriMatcher.match(uri);
+        final int match = URI_MATCHER.match(uri);
         Uri result;
         long id;
         switch (match) {
@@ -202,7 +189,7 @@ public class WatcardProvider extends ContentProvider{
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
 		SelectionBuilder builder = new SelectionBuilder();
         final SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        final int match = sUriMatcher.match(uri);
+        final int match = URI_MATCHER.match(uri);
         int count;
         String id;
         switch (match) {
@@ -271,7 +258,7 @@ public class WatcardProvider extends ContentProvider{
    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
        SelectionBuilder builder = new SelectionBuilder();
        final SQLiteDatabase db = databaseHelper.getWritableDatabase();
-       final int match = sUriMatcher.match(uri);
+       final int match = URI_MATCHER.match(uri);
        int count;
        String id;
        switch (match) {

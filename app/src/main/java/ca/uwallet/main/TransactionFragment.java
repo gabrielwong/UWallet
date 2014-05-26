@@ -11,7 +11,7 @@ import android.widget.SimpleCursorAdapter;
 import android.view.View;
 import android.widget.TextView;
 import ca.uwallet.main.data.WatcardContract;
-import ca.uwallet.main.util.ProviderUtils;
+import ca.uwallet.main.util.CommonUtils;
 
 /**
  * Transaction fragment, implements ScrollView to display information in table format
@@ -99,11 +99,11 @@ public class TransactionFragment extends ListFragment implements LoaderCallbacks
 		// Display the formatted date
 		if (cursor.getColumnName(columnIndex).equals(WatcardContract.Transaction.COLUMN_NAME_DATE)){
 			long time = cursor.getLong(columnIndex);
-			String s = ProviderUtils.formatDate(time);
+			String s = CommonUtils.formatDate(time);
 			((TextView) view).setText(s);
 			return true;
 		} else if (cursor.getColumnName(columnIndex).equals(WatcardContract.Transaction.COLUMN_NAME_AMOUNT)){
-			String s = ProviderUtils.formatCurrencyNoSymbol(cursor.getInt(columnIndex));
+			String s = CommonUtils.formatCurrencyNoSymbol(cursor.getInt(columnIndex));
 			((TextView) view).setText(s);
 			return true;
 		}

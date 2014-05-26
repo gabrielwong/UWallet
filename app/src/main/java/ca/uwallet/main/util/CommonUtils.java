@@ -7,13 +7,15 @@ import java.util.Date;
 import java.util.Locale;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import ca.uwallet.main.data.WatcardContract;
+import ca.uwallet.main.sync.accounts.Authenticator;
 
-public class ProviderUtils {
+public class CommonUtils {
 	
 	// Indices in array for each balance type
 	public static final int[] MEAL_PLAN_INDICES = {0, 1, 2, 6};
@@ -39,7 +41,7 @@ public class ProviderUtils {
 		DATE_FORMAT = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.US);
 	}
 	
-	private ProviderUtils(){}
+	private CommonUtils(){}
 	
 	/**
 	 * Formats the amount to a String including the currency symbol.
@@ -139,7 +141,7 @@ public class ProviderUtils {
 	/**
      * Perform a sync.
      */
-    public static void onRefresh(Account account) {
+    public static void requestSync(Account account) {
         // Pass the settings flags by inserting them in a bundle
         Bundle settingsBundle = new Bundle();
         settingsBundle.putBoolean(
@@ -151,5 +153,10 @@ public class ProviderUtils {
          * manual sync settings
          */
         ContentResolver.requestSync(account, WatcardContract.CONTENT_AUTHORITY, settingsBundle);
+    }
+
+    public static int getNumberOfAccounts(Context context) {
+        AccountManager accountManager = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
+        return accountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE).length;
     }
 }

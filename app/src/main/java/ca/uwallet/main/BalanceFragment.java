@@ -12,7 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import ca.uwallet.main.data.WatcardContract;
-import ca.uwallet.main.util.ProviderUtils;
+import ca.uwallet.main.util.CommonUtils;
 
 /**
  * Balance fragment displays watcard balances in a really simple format
@@ -63,15 +63,15 @@ public class BalanceFragment extends Fragment implements LoaderCallbacks<Cursor>
 		String totalLabel;
 		Resources res = getResources();
 		
-		if (cursor.getCount() < ProviderUtils.BALANCE_CURSOR_COUNT){ // Not synced yet
+		if (cursor == null || cursor.getCount() < CommonUtils.BALANCE_CURSOR_COUNT){ // Not synced yet
 			mealLabel = res.getString(R.string.meal_plan) + " " + res.getString(R.string.unknown);
 			flexLabel = res.getString(R.string.flex_dollars) + " " + res.getString(R.string.unknown);
 			totalLabel = res.getString(R.string.total) + " " + res.getString(R.string.unknown);
 		}else{ // Show the data
-			int[] amounts = ProviderUtils.getBalanceAmounts(cursor);
-			mealLabel = res.getString(R.string.meal_plan) + " " + ProviderUtils.formatCurrency(amounts[ProviderUtils.MEAL_PLAN]);
-			flexLabel = res.getString(R.string.flex_dollars) + " " +ProviderUtils.formatCurrency(amounts[ProviderUtils.FLEX_DOLLAR]);
-			totalLabel = res.getString(R.string.total) + " " +ProviderUtils.formatCurrency(amounts[ProviderUtils.TOTAL]);
+			int[] amounts = CommonUtils.getBalanceAmounts(cursor);
+			mealLabel = res.getString(R.string.meal_plan) + " " + CommonUtils.formatCurrency(amounts[CommonUtils.MEAL_PLAN]);
+			flexLabel = res.getString(R.string.flex_dollars) + " " + CommonUtils.formatCurrency(amounts[CommonUtils.FLEX_DOLLAR]);
+			totalLabel = res.getString(R.string.total) + " " + CommonUtils.formatCurrency(amounts[CommonUtils.TOTAL]);
 		}
 		((TextView)v.findViewById(R.id.meal_plan_label)).setText(mealLabel);
 		((TextView)v.findViewById(R.id.flex_dollars_label)).setText(flexLabel);

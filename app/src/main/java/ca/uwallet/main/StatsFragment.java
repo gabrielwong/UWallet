@@ -19,7 +19,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import ca.uwallet.main.data.WatcardContract;
-import ca.uwallet.main.util.ProviderUtils;
+import ca.uwallet.main.util.CommonUtils;
 
 
 /**
@@ -152,7 +152,7 @@ public class StatsFragment extends Fragment implements LoaderCallbacks<Cursor>, 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
-		int[] amounts = ProviderUtils.getBalanceAmounts(data);
+		int[] amounts = CommonUtils.getBalanceAmounts(data);
 		dataChart= getBalanceChart(amounts);
 		appendView(dataChart, BALANCE_CHART_ID);
 

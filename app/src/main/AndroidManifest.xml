@@ -33,7 +33,7 @@
 
         <provider
             android:name=".data.WatcardProvider"
-            android:authorities="ca.uwallet.main.data"
+            android:authorities="ca.uwallet.main.provider"
             android:exported="false"
             android:syncable="true"/>
 
@@ -50,7 +50,7 @@
 
         <!--  Service to manage accounts.  -->
         <service
-            android:name="ca.uwallet.main.sync.accounts.AuthenticatorService" >
+            android:name=".sync.accounts.AuthenticatorService" >
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
@@ -60,7 +60,7 @@
                 android:resource="@xml/authenticator" />
         </service>
         <service
-            android:name="ca.uwallet.main.sync.LoginService"
+            android:name=".sync.LoginService"
             android:exported="false"/>
     </application>
 
