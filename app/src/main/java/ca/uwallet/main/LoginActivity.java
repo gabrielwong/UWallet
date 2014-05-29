@@ -1,13 +1,13 @@
 package ca.uwallet.main;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
  * well.
  */
-public class LoginActivity extends Activity{
+public class LoginActivity extends FragmentActivity {
 	/**
 	 * The extra describing the default username to populate the field with.
 	 */
@@ -21,7 +21,7 @@ public class LoginActivity extends Activity{
         if (savedInstanceState == null) {
             LoginFragment fragment = new LoginFragment();
             fragment.setArguments(getIntent().getExtras());
-            getFragmentManager().beginTransaction()
+            getSupportFragmentManager().beginTransaction()
                     .add(R.id.login_fragment_container, fragment).commit();
         }
     }

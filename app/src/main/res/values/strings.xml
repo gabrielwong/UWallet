@@ -18,28 +18,14 @@
     <string name="error_incorrect_credentials">Invalid username or password</string>
     <string name="loading">Loading</string>
 	<string name="empty_transaction_message">Loading transactions&#8230;</string>
-	<string name="balance_button">Balance</string>
-	<string name="transactions_button">Transactions</string>
-	<string name="statistics_button">Statistics</string>
 	<string name="logout_button">Sign Out</string>
     <string name="login_progress_dialog_title">Signing In</string>
     <string name="login_progress_dialog_message">Please wait...</string>
-    
-	<color name="background">#27282B</color>
-	<color name="balanceBackground">#1485CC</color>
-	<color name="balanceBackground_click">#0C537F</color>
-	<color name="transactionsBackground">#CC4A14</color>
-	<color name="transactionsBackground_click">#7F2E0C</color>
-	<color name="statisticsBackground">#70CCAF</color>
-	<color name="statisticsBackground_click">#467F6D</color>
-	<color name="logoutBackground">#FFC01E</color>
-	<color name="logoutBackground_click">#7F600F</color>
-	
-	<string name="drawer_open">Open</string>
-    <string name="drawer_close">Close</string>
     <string name="action_sign_in_short">Sign In</string>
     <string name="action_forgot_password">Forgot Password</string>
     <string name="title_activity_login">Sign In</string>
+    <string name="fragment_balance_title">Balance</string>
+    <string name="fragment_transaction_title">Transactions</string>
 
     <string-array name="options_array">
         <item>Balance</item>

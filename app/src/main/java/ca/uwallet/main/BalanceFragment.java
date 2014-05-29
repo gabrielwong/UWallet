@@ -3,10 +3,10 @@ package ca.uwallet.main;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.app.Fragment;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.CursorLoader;
-import android.content.Loader;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,10 +23,9 @@ import ca.uwallet.main.util.CommonUtils;
 public class BalanceFragment extends Fragment implements LoaderCallbacks<Cursor>{
 	
 	private static final int LOADER_BALANCES_ID = 501;
-
-	public BalanceFragment() {
-		// Required empty public constructor
-	}
+    private TextView mealTextView;
+    private TextView flexTextView;
+    private TextView totalTextView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -42,12 +41,12 @@ public class BalanceFragment extends Fragment implements LoaderCallbacks<Cursor>
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View v = inflater.inflate(R.layout.fragment_balance, container,
+		View view = inflater.inflate(R.layout.fragment_balance, container,
 				false);
-		
-		//updateLabels(v, null);
-		
-		return v;
+        mealTextView = (TextView) view.findViewById(R.id.meal_plan_label);
+        flexTextView = (TextView) view.findViewById(R.id.flex_dollars_label);
+        totalTextView = (TextView) view.findViewById(R.id.total_label);
+        return view;
 	}
 
 	@Override
@@ -58,24 +57,24 @@ public class BalanceFragment extends Fragment implements LoaderCallbacks<Cursor>
 	private void updateLabels(View v, Cursor cursor){
 		if (v == null)
 			return;
-		String mealLabel;
-		String flexLabel;
-		String totalLabel;
+		String mealText;
+		String flexText;
+		String totalText;
 		Resources res = getResources();
 		
 		if (cursor == null || cursor.getCount() < CommonUtils.BALANCE_CURSOR_COUNT){ // Not synced yet
-			mealLabel = res.getString(R.string.meal_plan) + " " + res.getString(R.string.loading);
-			flexLabel = res.getString(R.string.flex_dollars) + " " + res.getString(R.string.loading);
-			totalLabel = res.getString(R.string.total) + " " + res.getString(R.string.loading);
+			mealText = res.getString(R.string.meal_plan) + " " + res.getString(R.string.loading);
+			flexText = res.getString(R.string.flex_dollars) + " " + res.getString(R.string.loading);
+			totalText = res.getString(R.string.total) + " " + res.getString(R.string.loading);
 		}else{ // Show the data
 			int[] amounts = CommonUtils.getBalanceAmounts(cursor);
-			mealLabel = res.getString(R.string.meal_plan) + " " + CommonUtils.formatCurrency(amounts[CommonUtils.MEAL_PLAN]);
-			flexLabel = res.getString(R.string.flex_dollars) + " " + CommonUtils.formatCurrency(amounts[CommonUtils.FLEX_DOLLAR]);
-			totalLabel = res.getString(R.string.total) + " " + CommonUtils.formatCurrency(amounts[CommonUtils.TOTAL]);
+			mealText = res.getString(R.string.meal_plan) + " " + CommonUtils.formatCurrency(amounts[CommonUtils.MEAL_PLAN]);
+			flexText = res.getString(R.string.flex_dollars) + " " + CommonUtils.formatCurrency(amounts[CommonUtils.FLEX_DOLLAR]);
+			totalText = res.getString(R.string.total) + " " + CommonUtils.formatCurrency(amounts[CommonUtils.TOTAL]);
 		}
-		((TextView)v.findViewById(R.id.meal_plan_label)).setText(mealLabel);
-		((TextView)v.findViewById(R.id.flex_dollars_label)).setText(flexLabel);
-		((TextView)v.findViewById(R.id.total_label)).setText(totalLabel);
+		mealTextView.setText(mealText);
+		flexTextView.setText(flexText);
+		totalTextView.setText(totalText);
 	}
 
 	@Override

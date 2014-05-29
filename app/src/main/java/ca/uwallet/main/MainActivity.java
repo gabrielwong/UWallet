@@ -7,160 +7,71 @@ import ca.uwallet.main.util.CommonUtils;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.ActionBar;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.app.Activity;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.widget.DrawerLayout;
+import android.support.v4.app.Fragment;;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 
 /**
  * Activity that is launched from the launcher. We switch between screens using fragments.
  * Does not handle login.
- * 
+ *
+ import android.app.FragmentManager
  * @author Gabriel
  *
  */
-public class MainActivity extends Activity implements
-	TransactionFragment.Listener, MenuFragment.Listener{
-	
+public class MainActivity extends FragmentActivity implements ActionBar.TabListener {
+
 	private static final String TAG = "MainActivity";
-	private String[] mMenuOptions;
-    private DrawerLayout mDrawerLayout;
-    private ListView mDrawerList;
-    private ActionBarDrawerToggle mDrawerToggle;
-	
 	private static final int RC_LOGIN = 17; // Response code for LoginActivity
-	
+
+    private ViewPager viewPager;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		
+
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		// Login if no account registered
 		int numAccounts = CommonUtils.getNumberOfAccounts(this);
 		Log.v(TAG, numAccounts + " accounts registered");
 		if (numAccounts == 0){
 			doLogin();
 		}
-		
-		switchToFragment(new BalanceFragment(), false);
-		
-		
-		// Sets up the drawer options
-		mMenuOptions = getResources().getStringArray(R.array.options_array);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.fragment_container);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
-        // Set the adapter for the list view
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.drawer_list_item, mMenuOptions));
-        
-        // Set the list's click listener
-        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
-     
-        //Action bar icon tap to open drawer
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
-        
-        
-        // ActionBarDrawerToggle ties together the the proper interactions
-        // between the sliding drawer and the action bar app icon
-        mDrawerToggle = new ActionBarDrawerToggle(
-                this,                  /* host Activity */
-                mDrawerLayout,         /* DrawerLayout object */
-                R.drawable.ic_drawer,  /* nav drawer image to replace 'Up' caret */
-                R.string.drawer_open,  /* "open drawer" description for accessibility */
-                R.string.drawer_close  /* "close drawer" description for accessibility */
-                ) {
-            public void onDrawerClosed(View view) {
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
+        // ViewPager and its adapters use support library
+        // fragments, so use getSupportFragmentManager.
+        FragmentPagerAdapter fragmentPagerAdapter =
+                new MainPagerAdapter(getSupportFragmentManager());
+        viewPager = (ViewPager) findViewById(R.id.pager);
+        viewPager.setAdapter(fragmentPagerAdapter);
 
-            public void onDrawerOpened(View drawerView) {
-                
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-        };
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-    	
-	}
-	
-	
-	private class DrawerItemClickListener implements ListView.OnItemClickListener {
-	    @Override
-	    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-	    	selectItem(position);
-	    }
-	}
-	
-	
-	/** Swaps fragments in the main content view */
-	private void selectItem(int position) {
-		switch(position) {
-		case 0:
-			switchToFragment (new BalanceFragment());
-			break;
-		case 1:
-			switchToFragment (new TransactionFragment());
-			break;
-		case 2:
-			switchToFragment (new StatsFragment());
-			break;
-		case 3:
-			onLogOutButtonClicked();
-			break;
-		}
+        ActionBar actionBar = getActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		
-	    // Highlight the selected item, close the drawer
-	    mDrawerList.setItemChecked(position, true);
-	    mDrawerLayout.closeDrawer(mDrawerList);
-	}
-
-	/**
-     * When using the ActionBarDrawerToggle, you must call it during
-     * onPostCreate() and onConfigurationChanged()...
-     */
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        // Sync the toggle state after onRestoreInstanceState has occurred.
-        mDrawerToggle.syncState();
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        // Pass any configuration change to the drawer toggles
-        mDrawerToggle.onConfigurationChanged(newConfig);
-    }
-	
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-         // The action bar home/up action should open or close the drawer.
-         // ActionBarDrawerToggle will take care of this.
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
+        for (int i = 0; i < fragmentPagerAdapter.getCount(); i++) {
+            ActionBar.Tab tab = actionBar.newTab()
+                    .setText(fragmentPagerAdapter.getPageTitle(i))
+                    .setTabListener(this);
+            actionBar.addTab(tab);
         }
-		return false;
-        
-    }
-	
-	
+        viewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                getActionBar().setSelectedNavigationItem(position);
+            }
+        });
+	}
 
 	@Override
 	public void onActivityResult(int requestCode, int responseCode, Intent data){
@@ -178,29 +89,6 @@ public class MainActivity extends Activity implements
 		}
 	}
 
-	/**
-	 * Convenience method. Switch to fragment and add to back stack.
-	 * @param newFrag The fragment to switch to.
-	 */
-	private void switchToFragment(Fragment newFrag) {
-		switchToFragment(newFrag, true);
-	}
-
-	/**
-	 * Switch to fragment.
-	 * @param newFrag The fragment to switch to.
-	 * @param addToBackStack Whether the transaction should be added to back stack.
-	 */
-	private void switchToFragment(Fragment newFrag, boolean addToBackStack) {
-		FragmentTransaction transaction = getFragmentManager().beginTransaction();
-		transaction.replace(R.id.content_frame, newFrag);
-		if (addToBackStack)
-			transaction.addToBackStack(null);
-		transaction.commit();
-
-	}
-
-	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -208,29 +96,32 @@ public class MainActivity extends Activity implements
 		return true;
 	}
 
-	@Override
-	public void onBalanceButtonClicked() {
-		switchToFragment(new BalanceFragment());
-	}
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+            case R.id.action_settings:
+                return true;
+            case R.id.action_logout:
+                removeAllAccounts();
+                CommonUtils.clearData(this);
+                doLogin();
+                return true;
+            default:
+                return false;
+        }
+    }
 
-	@Override
-	public void onTransactionsButtonClicked() {
-		switchToFragment(new TransactionFragment());
-	}
+    @Override
+    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+        viewPager.setCurrentItem(tab.getPosition());
+    }
 
-	@Override
-	public void onLogOutButtonClicked() {		
-		// Remove account from AccountManager
-		removeAllAccounts();
-		CommonUtils.clearData(this);
-		doLogin();
-	}
+    @Override
+    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {}
 
-	@Override
-	public void onStatsButtonClicked() {
-		switchToFragment(new StatsFragment(), true);
-	}
-	
+    @Override
+    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {}
+
 	/**
 	 * Returns the account manager for this activity.
 	 * @return
@@ -257,24 +148,45 @@ public class MainActivity extends Activity implements
 		Intent intent = new Intent(this, LoginActivity.class);
 		Log.v(TAG, "Starting login activity");
 		startActivityForResult(intent, RC_LOGIN);
-		switchToFragment(new BalanceFragment(), false);
 	}
-	
-	@Override
-	public void onBackPressed(){
-		// TODO MAKE FASTER
-		// Slow returning from balances and transactions (transactions not yet with content) to menu
-		// Fast returning from statistics to menu
-		// When about button is removed, there's an increase in speed
-		// DDMS indicates that there are 9 MB bitmap iamges
-		// Possibly because of large drawables for ImageButton
-		FragmentManager manager = getFragmentManager();
-		if (manager.getBackStackEntryCount() == 0){
-			super.onBackPressed(); // Closes the app
-		}
-		else{
-			// There is something to pop
-			manager.popBackStack();
-		}
-	}
+
+    private enum MainFragments {
+        BALANCE, TRANSACTION;
+    }
+
+    private class MainPagerAdapter extends FragmentPagerAdapter{
+
+        public MainPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            switch (MainFragments.values()[position]) {
+                case BALANCE:
+                    return new BalanceFragment();
+                case TRANSACTION:
+                    return new TransactionFragment();
+                default:
+                    return null;
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return MainFragments.values().length;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (MainFragments.values()[position]) {
+                case BALANCE:
+                    return getText(R.string.fragment_balance_title);
+                case TRANSACTION:
+                    return getText(R.string.fragment_transaction_title);
+                default:
+                    return null;
+            }
+        }
+    }
 }

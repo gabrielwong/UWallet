@@ -3,10 +3,10 @@ package ca.uwallet.main;
 import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.app.ListFragment;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.CursorLoader;
-import android.content.Loader;
+import android.support.v4.app.ListFragment;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.widget.SimpleCursorAdapter;
 import android.view.View;
 import android.widget.TextView;
@@ -21,13 +21,9 @@ import ca.uwallet.main.util.CommonUtils;
 
 public class TransactionFragment extends ListFragment implements LoaderCallbacks<Cursor>, SimpleCursorAdapter.ViewBinder{
 
-	private Listener mListener;
 	private static final int LOADER_TRANSACTION_ID = 137;
 	private static final String SORT_ORDER_DESCENDING = "DESC";
 	private SimpleCursorAdapter mAdapter;
-
-	public interface Listener {
-	}
 
 	public TransactionFragment() {
 		// Required empty public constructor
@@ -58,18 +54,11 @@ public class TransactionFragment extends ListFragment implements LoaderCallbacks
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		try {
-			mListener = (Listener) activity;
-		} catch (ClassCastException e) {
-			throw new ClassCastException(activity.toString()
-					+ " must implement OnFragmentInteractionListener");
-		}
 	}
 	
 	@Override
 	public void onDetach() {
 		super.onDetach();
-		mListener = null;
 	}
 
 	@Override
