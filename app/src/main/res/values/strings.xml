@@ -26,6 +26,7 @@
     <string name="title_activity_login">Sign In</string>
     <string name="fragment_balance_title">Balance</string>
     <string name="fragment_transaction_title">Transactions</string>
+    <string name="action_refresh">Refresh</string>
 
     <string-array name="options_array">
         <item>Balance</item>

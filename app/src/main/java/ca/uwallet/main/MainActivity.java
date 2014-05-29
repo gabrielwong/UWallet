@@ -85,20 +85,23 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 				Log.i(TAG, "User cancelled login. Closing down.");
 				finish();
 			}
+            performSync();
 			break;
 		}
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
+		getMenuInflater().inflate(R.menu.activity_main, menu);
 		return true;
 	}
 
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
+            case R.id.action_refresh:
+                performSync();
+                return true;
             case R.id.action_settings:
                 return true;
             case R.id.action_logout:
@@ -121,6 +124,13 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
     @Override
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {}
+
+    private void performSync() {
+        Account[] accounts = getAccountManager().getAccountsByType(Authenticator.ACCOUNT_TYPE);
+        for (Account account : accounts) {
+            CommonUtils.requestSync(account);
+        }
+    }
 
 	/**
 	 * Returns the account manager for this activity.
