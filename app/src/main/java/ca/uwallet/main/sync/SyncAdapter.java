@@ -15,17 +15,20 @@ import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.OperationApplicationException;
+import android.content.SharedPreferences;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import ca.uwallet.main.model.Transaction;
 import ca.uwallet.main.data.WatcardContract;
 import ca.uwallet.main.sync.utils.ConnectionHelper;
 import ca.uwallet.main.sync.utils.ParseHelper;
+import ca.uwallet.main.util.Constants;
 
 /**
  * Handle syncing of WatCard data.
@@ -59,6 +62,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 		
 		syncBalances(username, password, syncResult);
 		syncTransactions(username, password, syncResult);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        preferences.edit().putLong(Constants.LAST_SYNC, System.currentTimeMillis()).commit();
 	}
 	
 	/**

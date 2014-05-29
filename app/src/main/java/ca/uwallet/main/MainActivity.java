@@ -4,6 +4,7 @@ package ca.uwallet.main;
 
 import ca.uwallet.main.sync.accounts.Authenticator;
 import ca.uwallet.main.util.CommonUtils;
+import ca.uwallet.main.util.Constants;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -11,7 +12,9 @@ import android.app.ActionBar;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -34,6 +37,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
 	private static final String TAG = "MainActivity";
 	private static final int RC_LOGIN = 17; // Response code for LoginActivity
+    private static final long DURATION_BETWEEN_AUTO_SYNC = 1000L * 60L * 30L; // 30 minutes;
 
     private ViewPager viewPager;
 
@@ -44,11 +48,11 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		setContentView(R.layout.activity_main);
 
 		// Login if no account registered
-		int numAccounts = CommonUtils.getNumberOfAccounts(this);
-		Log.v(TAG, numAccounts + " accounts registered");
-		if (numAccounts == 0){
+		if (!isLoggedIn()){
 			doLogin();
-		}
+		} else {
+            performSyncIfStale();
+        }
 
         // ViewPager and its adapters use support library
         // fragments, so use getSupportFragmentManager.
@@ -151,6 +155,10 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			accountManager.removeAccount(account, null, null);
 		}
 	}
+
+    public boolean isLoggedIn() {
+        return CommonUtils.getAccountCount(this) > 0;
+    }
 	
 	/**
 	 * Launches the LoginActivity.
@@ -160,6 +168,14 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		Log.v(TAG, "Starting login activity");
 		startActivityForResult(intent, RC_LOGIN);
 	}
+
+    private void performSyncIfStale() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        long lastSync = preferences.getLong(Constants.LAST_SYNC, 0L);
+        if (lastSync + DURATION_BETWEEN_AUTO_SYNC < System.currentTimeMillis()){
+            performSync();
+        }
+    }
 
     private enum MainFragments {
         BALANCE, TRANSACTION;
