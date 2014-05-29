@@ -23,11 +23,7 @@ public class TransactionFragment extends ListFragment implements LoaderCallbacks
 
 	private static final int LOADER_TRANSACTION_ID = 137;
 	private static final String SORT_ORDER_DESCENDING = "DESC";
-	private SimpleCursorAdapter mAdapter;
-
-	public TransactionFragment() {
-		// Required empty public constructor
-	}
+	private SimpleCursorAdapter adapter;
 	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState){
@@ -41,11 +37,11 @@ public class TransactionFragment extends ListFragment implements LoaderCallbacks
 		String[] from = {WatcardContract.Transaction.COLUMN_NAME_DATE,
 				WatcardContract.Terminal.COLUMN_NAME_TEXT,
 				WatcardContract.Transaction.COLUMN_NAME_AMOUNT};
-		mAdapter = new SimpleCursorAdapter(getActivity(),
+		adapter = new SimpleCursorAdapter(getActivity(),
 				R.layout.simple_list_transactions, null,
 				from, to, 0);
-		mAdapter.setViewBinder(this); // So that dates are displayed correctly
-		setListAdapter(mAdapter);        
+		adapter.setViewBinder(this); // So that dates are displayed correctly
+		setListAdapter(adapter);
 		
 		// Create the transaction loader
 		getLoaderManager().initLoader(LOADER_TRANSACTION_ID, null, this);
@@ -74,13 +70,13 @@ public class TransactionFragment extends ListFragment implements LoaderCallbacks
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 		// Swap cursor
-		mAdapter.swapCursor(data);
+		adapter.swapCursor(data);
 	}
 
 	@Override
 	public void onLoaderReset(Loader<Cursor> loader) {
 		// Remove the cursor
-		mAdapter.swapCursor(null);
+		adapter.swapCursor(null);
 	}
 	
 	@Override
