@@ -1,4 +1,4 @@
-package ca.uwallet.main;
+package ca.uwallet.main.ui.fragments;
 
 import org.achartengine.ChartFactory;
 import org.achartengine.GraphicalView;
@@ -18,6 +18,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+
+import ca.uwallet.main.R;
 import ca.uwallet.main.data.WatcardContract;
 import ca.uwallet.main.util.CommonUtils;
 

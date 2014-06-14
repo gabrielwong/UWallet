@@ -1,8 +1,11 @@
-package ca.uwallet.main;
+package ca.uwallet.main.ui.activities;
 
 
 
+import ca.uwallet.main.R;
 import ca.uwallet.main.sync.accounts.Authenticator;
+import ca.uwallet.main.ui.fragments.BalanceFragment;
+import ca.uwallet.main.ui.fragments.TransactionFragment;
 import ca.uwallet.main.util.CommonUtils;
 import ca.uwallet.main.util.Constants;
 

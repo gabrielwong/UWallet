@@ -8,7 +8,7 @@ import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import ca.uwallet.main.LoginActivity;
+import ca.uwallet.main.ui.activities.LoginActivity;
 
 public class Authenticator extends AbstractAccountAuthenticator {
 
