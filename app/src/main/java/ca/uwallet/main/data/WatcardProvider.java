@@ -30,6 +30,9 @@ public class WatcardProvider extends ContentProvider{
 							 ROUTE_TERMINAL_ID = 6,
 							 ROUTE_CATEGORY = 7,
 							 ROUTE_CATEGORY_ID = 8;
+
+    public static final String QUERY_NOTIFY = "QUERY_NOTIFY";
+
 	static{
 		URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
 		URI_MATCHER.addURI(AUTHORITY, WatcardContract.PATH_TRANSACTION , ROUTE_TRANSACTION);
@@ -152,20 +155,16 @@ public class WatcardProvider extends ContentProvider{
         long id;
         switch (match) {
             case ROUTE_TRANSACTION:
-                id = db.insertOrThrow(WatcardContract.Transaction.TABLE_NAME, null, values);
-                result = Uri.parse(WatcardContract.Transaction.CONTENT_URI + "/" + id);
+                id = db.insertWithOnConflict(WatcardContract.Transaction.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
                 break;
             case ROUTE_BALANCE:
-            	id = db.insertOrThrow(WatcardContract.Balance.TABLE_NAME, null, values);
-            	result = Uri.parse(WatcardContract.Balance.CONTENT_URI + "/" + id);
+            	id = db.insertWithOnConflict(WatcardContract.Balance.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
             	break;
             case ROUTE_TERMINAL:
-            	id = db.insertOrThrow(WatcardContract.Terminal.TABLE_NAME, null, values);
-            	result = Uri.parse(WatcardContract.Terminal.CONTENT_URI + "/" + id);
+            	id = db.insertWithOnConflict(WatcardContract.Terminal.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
             	break;
             case ROUTE_CATEGORY:
-            	id = db.insertOrThrow(WatcardContract.Category.TABLE_NAME, null, values);
-            	result = Uri.parse(WatcardContract.Category.CONTENT_URI + "/" + id);
+            	id = db.insertWithOnConflict(WatcardContract.Category.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
             	break;
             case ROUTE_TRANSACTION_ID:
             case ROUTE_BALANCE_ID:
@@ -179,8 +178,59 @@ public class WatcardProvider extends ContentProvider{
         Context ctx = getContext();
         assert ctx != null;
         ctx.getContentResolver().notifyChange(uri, null, false);
-        return result;
+        String notify = uri.getQueryParameter(QUERY_NOTIFY);
+        if (id != -1 && (notify == null || "true".equals(notify))) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return uri.buildUpon().appendEncodedPath(String.valueOf(id)).build();
 	}
+
+    @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        int res = 0;
+        db.beginTransaction();
+        String table;
+        switch (URI_MATCHER.match(uri)) {
+            case ROUTE_TRANSACTION:
+                table = WatcardContract.Transaction.TABLE_NAME;
+                break;
+            case ROUTE_BALANCE:
+                table = WatcardContract.Balance.TABLE_NAME;
+                break;
+            case ROUTE_TERMINAL:
+                table = WatcardContract.Terminal.TABLE_NAME;
+                break;
+            case ROUTE_CATEGORY:
+                table = WatcardContract.Category.TABLE_NAME;
+                break;
+            case ROUTE_TRANSACTION_ID:
+            case ROUTE_BALANCE_ID:
+            case ROUTE_TERMINAL_ID:
+            case ROUTE_CATEGORY_ID:
+                throw new UnsupportedOperationException("Bulk insert not supported on URI: " + uri);
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        try {
+            for (ContentValues v : values) {
+                long id = db.insert(table, null, v);
+                db.yieldIfContendedSafely();
+                if (id != -1) {
+                    res++;
+                }
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+        String notify = uri.getQueryParameter(QUERY_NOTIFY);
+        if (res != 0 && (notify == null || "true".equals(notify))) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        return res;
+    }
 	
 	/**
 	 * Delete an entry by database by URI.
@@ -247,7 +297,10 @@ public class WatcardProvider extends ContentProvider{
         // Send broadcast to registered ContentObservers, to refresh UI.
         Context ctx = getContext();
         assert ctx != null;
-        ctx.getContentResolver().notifyChange(uri, null, false);
+        String notify = uri.getQueryParameter(QUERY_NOTIFY);
+        if (count > 0 && (notify == null || "true".equals(notify))) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
         return count;
 	}
 
@@ -312,7 +365,10 @@ public class WatcardProvider extends ContentProvider{
        }
        Context ctx = getContext();
        assert ctx != null;
-       ctx.getContentResolver().notifyChange(uri, null, false);
+       String notify = uri.getQueryParameter(QUERY_NOTIFY);
+       if (count > 0 && (notify == null || "true".equals(notify))) {
+           getContext().getContentResolver().notifyChange(uri, null);
+       }
        return count;
    }
 
