@@ -156,7 +156,8 @@ public class CommonUtils {
     }
 
     public static int getAccountCount(Context context) {
-        AccountManager accountManager = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
+        AccountManager accountManager =
+                (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
         return accountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE).length;
     }
 }

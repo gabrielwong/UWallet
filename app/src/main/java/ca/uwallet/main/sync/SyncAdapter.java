@@ -20,14 +20,20 @@ import android.content.SyncResult;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.squareup.otto.Produce;
+
+import ca.uwallet.main.bus.event.SyncStatusEvent;
 import ca.uwallet.main.model.Transaction;
 import ca.uwallet.main.data.WatcardContract;
 import ca.uwallet.main.sync.utils.ConnectionHelper;
 import ca.uwallet.main.sync.utils.ParseHelper;
+import ca.uwallet.main.bus.BusProvider;
 import ca.uwallet.main.util.Constants;
 
 /**
@@ -41,8 +47,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 	public static final int ADDED_BY_WATCARD = 0;
 	public static final int ADDED_BY_COMPILED = 1;
 	public static final int ADDED_BY_USER = 2;
-	
-	/**
+    private SyncStatusEvent.Status syncStatus = SyncStatusEvent.Status.FINISHED;
+    private Handler handler = new Handler(Looper.getMainLooper());
+
+    /**
 	 * Set up sync adapter.
 	 * @param context
 	 * @param autoInitialize
@@ -55,6 +63,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 	public void onPerformSync(Account account, Bundle extras, String authority,
 			ContentProviderClient provider, SyncResult syncResult) {
 		Log.i(TAG, "Begin network synchronization");
+        setSyncStatus(SyncStatusEvent.Status.STARTED);
 		// Get login details
 		AccountManager accountManager = AccountManager.get(getContext());
 		String username = account.name;
@@ -64,6 +73,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 		syncTransactions(username, password, syncResult);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         preferences.edit().putLong(Constants.LAST_SYNC, System.currentTimeMillis()).commit();
+        setSyncStatus(SyncStatusEvent.Status.FINISHED);
 	}
 	
 	/**
@@ -283,4 +293,18 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 		contentResolver.notifyChange(WatcardContract.Transaction.CONTENT_URI, null, false);
 		contentResolver.notifyChange(WatcardContract.Terminal.CONTENT_URI, null, false);
 	}
+
+    @Produce public SyncStatusEvent produceSyncStatus() {
+        return new SyncStatusEvent(syncStatus);
+    }
+
+    private void setSyncStatus(SyncStatusEvent.Status syncStatus) {
+        this.syncStatus = syncStatus;
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                BusProvider.getInstance().post(produceSyncStatus());
+            }
+        });
+    }
 }

@@ -38,8 +38,7 @@
 
         <service
             android:name=".sync.SyncService"
-            android:exported="true"
-            android:process="@string/watcard_sync_process" >
+            android:exported="true">
             <intent-filter>ca.uwallet.main.provider
                 <action android:name="android.content.SyncAdapter"/>
             </intent-filter>

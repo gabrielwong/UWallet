@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
 
+import ca.uwallet.main.bus.BusProvider;
+
 /**
  * Define a Service that returns an IBinder for the
  * sync adapter class, allowing the sync adapter framework to call
@@ -12,7 +14,7 @@ import android.util.Log;
  */
 public class SyncService extends Service {
     // Storage for an instance of the sync adapter
-    private static SyncAdapter syncAdapter = null;
+    private static SyncAdapter syncAdapter;
     // Object to use as a thread-safe lock
     private static final Object syncAdapterLock = new Object();
     
@@ -28,14 +30,12 @@ public class SyncService extends Service {
         synchronized (syncAdapterLock) {
             if (syncAdapter == null) {
                 syncAdapter = new SyncAdapter(getApplicationContext(), true);
+                BusProvider.getInstance().register(syncAdapter);
             }
         }
     }
     
     @Override
-    /**
-     * Logging-only destructor.
-     */
     public void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "Service destroyed");
