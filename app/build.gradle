@@ -46,6 +46,7 @@ android {
 
     buildTypes {
         debug {
+            applicationIdSuffix '.debug'
             signingConfig signingConfigs.debugSignConfig
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
@@ -53,7 +54,7 @@ android {
 
         release {
             signingConfig signingConfigs.releaseSignConfig
-            runProguard false
+            runProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
