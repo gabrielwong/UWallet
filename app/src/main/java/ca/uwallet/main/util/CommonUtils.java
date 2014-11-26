@@ -155,8 +155,9 @@ public class CommonUtils {
         ContentResolver.requestSync(account, WatcardContract.CONTENT_AUTHORITY, settingsBundle);
     }
 
-    public static int getNumberOfAccounts(Context context) {
-        AccountManager accountManager = (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
+    public static int getAccountCount(Context context) {
+        AccountManager accountManager =
+                (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
         return accountManager.getAccountsByType(Authenticator.ACCOUNT_TYPE).length;
     }
 }

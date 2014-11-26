@@ -1,15 +1,19 @@
-package ca.uwallet.main;
+package ca.uwallet.main.ui.fragments;
 
-import android.app.Activity;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.view.View;
 import android.widget.TextView;
+
+import ca.uwallet.main.R;
 import ca.uwallet.main.data.WatcardContract;
 import ca.uwallet.main.util.CommonUtils;
 
@@ -19,43 +23,36 @@ import ca.uwallet.main.util.CommonUtils;
  *
  */
 
-public class TransactionFragment extends ListFragment implements LoaderCallbacks<Cursor>, SimpleCursorAdapter.ViewBinder{
+public class TransactionFragment extends Fragment implements LoaderCallbacks<Cursor>, SimpleCursorAdapter.ViewBinder{
 
 	private static final int LOADER_TRANSACTION_ID = 137;
 	private static final String SORT_ORDER_DESCENDING = "DESC";
-	private SimpleCursorAdapter adapter;
-	
-	@Override
-	public void onActivityCreated(Bundle savedInstanceState){
-		super.onActivityCreated(savedInstanceState);
-		
-		// Set text to display if there's no data
-		setEmptyText(getResources().getString(R.string.empty_transaction_message));
-		
-		// Create the adapter
-		int[] to = {R.id.date, R.id.description, R.id.amount};
-		String[] from = {WatcardContract.Transaction.COLUMN_NAME_DATE,
-				WatcardContract.Terminal.COLUMN_NAME_TEXT,
-				WatcardContract.Transaction.COLUMN_NAME_AMOUNT};
-		adapter = new SimpleCursorAdapter(getActivity(),
-				R.layout.simple_list_transactions, null,
-				from, to, 0);
-		adapter.setViewBinder(this); // So that dates are displayed correctly
-		setListAdapter(adapter);
-		
-		// Create the transaction loader
-		getLoaderManager().initLoader(LOADER_TRANSACTION_ID, null, this);
-	}
+    private static final String[] ADAPTER_BIND_FROM = {
+            WatcardContract.Transaction.COLUMN_NAME_DATE,
+            WatcardContract.Terminal.COLUMN_NAME_TEXT,
+            WatcardContract.Transaction.COLUMN_NAME_AMOUNT};
+    private static final int[] ADAPTER_BIND_TO = {R.id.date, R.id.description, R.id.amount};
 
-	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-	}
-	
-	@Override
-	public void onDetach() {
-		super.onDetach();
-	}
+	private SimpleCursorAdapter adapter;
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_transaction, null);
+
+        ListView list = (ListView) view.findViewById(R.id.transaction_list);
+        // Create the adapter
+        adapter = new SimpleCursorAdapter(getActivity(),
+                R.layout.simple_list_transactions, null,
+                ADAPTER_BIND_FROM, ADAPTER_BIND_TO, 0);
+        adapter.setViewBinder(this); // So that dates are displayed correctly
+        list.setAdapter(adapter);
+        list.setEmptyView(view.findViewById(R.id.transaction_loading_progress_container));
+
+        // Create the transaction loader
+        getLoaderManager().initLoader(LOADER_TRANSACTION_ID, null, this);
+
+        return view;
+    }
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {

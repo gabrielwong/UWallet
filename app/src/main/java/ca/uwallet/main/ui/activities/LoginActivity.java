@@ -1,7 +1,10 @@
-package ca.uwallet.main;
+package ca.uwallet.main.ui.activities;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+
+import ca.uwallet.main.R;
+import ca.uwallet.main.ui.fragments.LoginFragment;
 
 /**
  * Activity which displays a login screen to the user, offering registration as

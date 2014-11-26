@@ -1,4 +1,4 @@
-package ca.uwallet.main;
+package ca.uwallet.main.ui.fragments;
 
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
@@ -25,6 +25,8 @@ import android.widget.Toast;
 
 import java.io.Serializable;
 
+import ca.uwallet.main.ui.activities.LoginActivity;
+import ca.uwallet.main.R;
 import ca.uwallet.main.sync.LoginService;
 
 public class LoginFragment extends Fragment

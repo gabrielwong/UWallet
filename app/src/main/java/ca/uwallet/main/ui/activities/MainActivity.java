@@ -1,9 +1,15 @@
-package ca.uwallet.main;
+package ca.uwallet.main.ui.activities;
 
 
 
+import ca.uwallet.main.R;
+import ca.uwallet.main.bus.BusProvider;
+import ca.uwallet.main.bus.event.SyncStatusEvent;
 import ca.uwallet.main.sync.accounts.Authenticator;
+import ca.uwallet.main.ui.fragments.BalanceFragment;
+import ca.uwallet.main.ui.fragments.TransactionFragment;
 import ca.uwallet.main.util.CommonUtils;
+import ca.uwallet.main.util.Constants;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
@@ -11,7 +17,9 @@ import android.app.ActionBar;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -20,37 +28,45 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
+
+import com.squareup.otto.Subscribe;
 
 /**
- * Activity that is launched from the launcher. We switch between screens using fragments.
- * Does not handle login.
- *
- import android.app.FragmentManager
- * @author Gabriel
- *
+ * Main entry activity. Redirects to LoginActivity if not logged in.
  */
-public class MainActivity extends FragmentActivity implements ActionBar.TabListener {
+public class MainActivity extends FragmentActivity
+        implements ActionBar.TabListener {
 
 	private static final String TAG = "MainActivity";
 	private static final int RC_LOGIN = 17; // Response code for LoginActivity
+    private static final long DURATION_BETWEEN_AUTO_SYNC = 1000L * 60L * 30L; // 30 minutes;
 
     private ViewPager viewPager;
+    private boolean isSyncActive;
+
+    private enum MainFragments {
+        BALANCE, TRANSACTION;
+    }
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-
 		super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.activity_main);
 
 		// Login if no account registered
-		int numAccounts = CommonUtils.getNumberOfAccounts(this);
-		Log.v(TAG, numAccounts + " accounts registered");
-		if (numAccounts == 0){
+		if (!isLoggedIn()){
 			doLogin();
-		}
+		} else {
+            performSyncIfStale();
+        }
 
+        initTabs();
+	}
+
+    private void initTabs() {
         // ViewPager and its adapters use support library
-        // fragments, so use getSupportFragmentManager.
         FragmentPagerAdapter fragmentPagerAdapter =
                 new MainPagerAdapter(getSupportFragmentManager());
         viewPager = (ViewPager) findViewById(R.id.pager);
@@ -71,7 +87,19 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                 getActionBar().setSelectedNavigationItem(position);
             }
         });
-	}
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        BusProvider.getInstance().register(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        BusProvider.getInstance().unregister(this);
+    }
 
 	@Override
 	public void onActivityResult(int requestCode, int responseCode, Intent data){
@@ -95,6 +123,13 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		getMenuInflater().inflate(R.menu.activity_main, menu);
 		return true;
 	}
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem refresh = menu.findItem(R.id.action_refresh);
+        refresh.setVisible(!isSyncActive);
+        return true;
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
@@ -139,7 +174,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 	private AccountManager getAccountManager(){
 		return (AccountManager) getSystemService(Context.ACCOUNT_SERVICE);
 	}
-	
+
 	/**
 	 * Removes all accounts from the account manager.
 	 */
@@ -150,7 +185,11 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 			accountManager.removeAccount(account, null, null);
 		}
 	}
-	
+
+    public boolean isLoggedIn() {
+        return CommonUtils.getAccountCount(this) > 0;
+    }
+
 	/**
 	 * Launches the LoginActivity.
 	 */
@@ -160,8 +199,18 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 		startActivityForResult(intent, RC_LOGIN);
 	}
 
-    private enum MainFragments {
-        BALANCE, TRANSACTION;
+    private void performSyncIfStale() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        long lastSync = preferences.getLong(Constants.LAST_SYNC, 0L);
+        if (lastSync + DURATION_BETWEEN_AUTO_SYNC < System.currentTimeMillis()) {
+            performSync();
+        }
+    }
+
+    @Subscribe public void onSyncStatusChanged(SyncStatusEvent event) {
+        isSyncActive = event.isInProgress();
+        setProgressBarIndeterminateVisibility(isSyncActive);
+        invalidateOptionsMenu();
     }
 
     private class MainPagerAdapter extends FragmentPagerAdapter{

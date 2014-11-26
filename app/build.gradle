@@ -7,6 +7,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:support-v4:21.0.2'
     compile 'com.android.support:support-v4:21.0.2'
+    compile 'com.squareup:otto:1.3.5'
 }
 
 android {
@@ -30,7 +31,7 @@ android {
             if (file('gradle.properties').exists()) {
                 storeFile file(project.keyStore)
                 storePassword project.keyStorePassword
-                keyAlias project.keyAliascd
+                keyAlias project.keyAlias
                 keyPassword project.keyAliasPassword
             }
         }
@@ -46,6 +47,7 @@ android {
 
     buildTypes {
         debug {
+            applicationIdSuffix '.debug'
             signingConfig signingConfigs.debugSignConfig
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
@@ -53,7 +55,7 @@ android {
 
         release {
             signingConfig signingConfigs.releaseSignConfig
-            runProguard false
+            runProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }

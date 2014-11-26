@@ -15,17 +15,27 @@ import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.OperationApplicationException;
+import android.content.SharedPreferences;
 import android.content.SyncResult;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.squareup.otto.Produce;
+
+import ca.uwallet.main.bus.event.SyncStatusEvent;
+import ca.uwallet.main.data.WatcardProvider;
 import ca.uwallet.main.model.Transaction;
 import ca.uwallet.main.data.WatcardContract;
 import ca.uwallet.main.sync.utils.ConnectionHelper;
 import ca.uwallet.main.sync.utils.ParseHelper;
+import ca.uwallet.main.bus.BusProvider;
+import ca.uwallet.main.util.Constants;
 
 /**
  * Handle syncing of WatCard data.
@@ -38,8 +48,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 	public static final int ADDED_BY_WATCARD = 0;
 	public static final int ADDED_BY_COMPILED = 1;
 	public static final int ADDED_BY_USER = 2;
-	
-	/**
+    private SyncStatusEvent.Status syncStatus = SyncStatusEvent.Status.FINISHED;
+    private Handler handler = new Handler(Looper.getMainLooper());
+
+    /**
 	 * Set up sync adapter.
 	 * @param context
 	 * @param autoInitialize
@@ -52,6 +64,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 	public void onPerformSync(Account account, Bundle extras, String authority,
 			ContentProviderClient provider, SyncResult syncResult) {
 		Log.i(TAG, "Begin network synchronization");
+        setSyncStatus(SyncStatusEvent.Status.STARTED);
 		// Get login details
 		AccountManager accountManager = AccountManager.get(getContext());
 		String username = account.name;
@@ -59,6 +72,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 		
 		syncBalances(username, password, syncResult);
 		syncTransactions(username, password, syncResult);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        preferences.edit().putLong(Constants.LAST_SYNC, System.currentTimeMillis()).commit();
+        setSyncStatus(SyncStatusEvent.Status.FINISHED);
 	}
 	
 	/**
@@ -178,14 +194,16 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 		ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
 		
 		// Delete the old data
+        Uri uri = WatcardContract.Transaction.CONTENT_URI.buildUpon()
+                .appendQueryParameter(WatcardProvider.QUERY_NOTIFY, "false").build();
 		Log.i(TAG, "Scheduling delete of old transactions");
-		batch.add(ContentProviderOperation.newDelete(WatcardContract.Transaction.CONTENT_URI).build()); 
+		batch.add(ContentProviderOperation.newDelete(uri).build());
 		syncResult.stats.numDeletes++;
 		
 		Log.i(TAG, "Scheduling insert of new transactions");
 		// Schedule transaction inserts
 		for (Transaction t : transactions){
-			batch.add(ContentProviderOperation.newInsert(WatcardContract.Transaction.CONTENT_URI)
+			batch.add(ContentProviderOperation.newInsert(uri)
 					.withValue(WatcardContract.Transaction.COLUMN_NAME_AMOUNT, t.getAmount())
 					.withValue(WatcardContract.Transaction.COLUMN_NAME_DATE, t.getDate())
 					.withValue(WatcardContract.Transaction.COLUMN_NAME_MONEY_TYPE, t.getType())
@@ -197,7 +215,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 		Log.i(TAG, "Applying batch update of transactions");
         ContentResolver contentResolver = getContext().getContentResolver();
 		contentResolver.applyBatch(WatcardContract.CONTENT_AUTHORITY, batch);
-		contentResolver.notifyChange(WatcardContract.Transaction.CONTENT_URI, null, false);
 	}
 	
 	/**
@@ -211,13 +228,15 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 		ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
 		
 		// Delete the old data
+        Uri uri = WatcardContract.Balance.CONTENT_URI.buildUpon()
+                .appendQueryParameter(WatcardProvider.QUERY_NOTIFY, "false").build();
 		Log.i(TAG, "Scheduling delete of old balances");
-		batch.add(ContentProviderOperation.newDelete(WatcardContract.Balance.CONTENT_URI).build());
+		batch.add(ContentProviderOperation.newDelete(uri).build());
 		syncResult.stats.numDeletes++;
 		
 		Log.i(TAG, "Scheduling insert of new balances");
 		for (Integer amount : balances){
-			batch.add(ContentProviderOperation.newInsert(WatcardContract.Balance.CONTENT_URI)
+			batch.add(ContentProviderOperation.newInsert(uri)
 					.withValue(WatcardContract.Balance.COLUMN_NAME_AMOUNT, amount)
 					.build());
 			syncResult.stats.numInserts++;
@@ -234,7 +253,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 		ArrayList<ContentProviderOperation> batch = new ArrayList<ContentProviderOperation>();
 		
 		Log.i(TAG, "Fetching local terminal entries for merge");
-		Uri uri = WatcardContract.Terminal.CONTENT_URI;
+		Uri uri = WatcardContract.Terminal.CONTENT_URI.buildUpon()
+                .appendQueryParameter(WatcardProvider.QUERY_NOTIFY, "false").build();
 		Cursor c = getContext().getContentResolver().query(uri, null, null, null, null);
 		assert c != null;
 		int idColumn = c.getColumnIndex(WatcardContract.Terminal._ID);
@@ -251,7 +271,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 			String match = map.get(id);
 			// There's an entry that needs updating
 			if (match != null){
-				Uri existingUri = WatcardContract.Terminal.CONTENT_URI.buildUpon()
+				Uri existingUri = uri.buildUpon()
                         .appendPath(Integer.toString(id)).build();
 				batch.add(ContentProviderOperation.newUpdate(existingUri)
 						.withValue(WatcardContract.Terminal.COLUMN_NAME_TEXT, map.get(id))
@@ -264,7 +284,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 		c.close();
 		
 		for (int id : map.keySet()){
-			batch.add(ContentProviderOperation.newInsert(WatcardContract.Terminal.CONTENT_URI)
+			batch.add(ContentProviderOperation.newInsert(uri)
 					.withValue(WatcardContract.Terminal._ID, id)
 					.withValue(WatcardContract.Terminal.COLUMN_NAME_TEXT, map.get(id))
 					.withValue(WatcardContract.Terminal.COLUMN_NAME_TEXT_PRIORITY, priority)
@@ -275,7 +295,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter{
 		Log.i(TAG, "Applying batch update of terminals");
         ContentResolver contentResolver = getContext().getContentResolver();
 		contentResolver.applyBatch(WatcardContract.CONTENT_AUTHORITY, batch);
-		contentResolver.notifyChange(WatcardContract.Transaction.CONTENT_URI, null, false);
-		contentResolver.notifyChange(WatcardContract.Terminal.CONTENT_URI, null, false);
+        contentResolver.notifyChange(WatcardContract.Transaction.CONTENT_URI, null, false);
+        contentResolver.notifyChange(WatcardContract.Terminal.CONTENT_URI, null, false);
 	}
+
+    @Produce public SyncStatusEvent produceSyncStatus() {
+        return new SyncStatusEvent(syncStatus);
+    }
+
+    private void setSyncStatus(SyncStatusEvent.Status syncStatus) {
+        this.syncStatus = syncStatus;
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                BusProvider.getInstance().post(produceSyncStatus());
+            }
+        });
+    }
 }

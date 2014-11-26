@@ -1,4 +1,4 @@
-package ca.uwallet.main;
+package ca.uwallet.main.ui.fragments;
 
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -11,6 +11,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import ca.uwallet.main.R;
 import ca.uwallet.main.data.WatcardContract;
 import ca.uwallet.main.util.CommonUtils;
 
